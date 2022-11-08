@@ -3,24 +3,21 @@ package de.tu_chemnitz.tdp_fiddle
 object SATSolver {
 
     fun isSolvable(cnf: Set<Clause>): Boolean {
-        val uniqueLiterals = cnf.getUniqueLiterals()
-
-        return dp(cnf, uniqueLiterals)
+        return dp(cnf)
     }
 
-    private fun dp(cnf: Set<Clause>, uniqueLiterals: Set<String>): Boolean {
+    private fun dp(cnf: Set<Clause>): Boolean {
         if (cnf.isEmpty()) return true
         if (cnf.any { it.literals.isEmpty() }) return false
         if (!cnf.containsContradiction()) return false
 
-        val literal = uniqueLiterals.firstOrNull() ?: return false
-        val remainingLiterals = uniqueLiterals - literal
+        val literal = cnf.first().literals.firstOrNull()?.value ?: return false
 
         val positive = cnf.simplify(Literal(literal, true))
         val negative = cnf.simplify(Literal(literal, false))
 
 
-        return dp(positive, remainingLiterals) || dp(negative, remainingLiterals)
+        return dp(positive) || dp(negative)
     }
 
     private fun Set<Clause>.containsContradiction(): Boolean {
@@ -38,9 +35,6 @@ object SATSolver {
             }
         return true
     }
-
-    private fun Set<Clause>.getUniqueLiterals(): Set<String> =
-        asSequence().flatMap { clause -> clause.literals.asSequence() }.map { it.value }.toSet()
 
     private fun Clause.simplify(literal: Literal): Clause? {
         if (literal in literals)

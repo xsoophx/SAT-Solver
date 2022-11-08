@@ -24,36 +24,13 @@ class SATSolverTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getInputsByClauses")
-    fun `gets solvable formulas correctly`(clauses: Set<Clause>) {
-        val actual = SATSolver.isSolvable(clauses)
-        assertEquals(expected = true, actual = actual)
-    }
-
-    @ParameterizedTest
     @MethodSource("getsInputByCNF")
-    fun `gets non-solvable formulas correctly`(cnf: String, expected: Boolean) {
+    fun `gets formulas correctly`(cnf: String, expected: Boolean) {
         val actual = SATSolver.isSolvable(Main.readInput(cnf).toSet())
         assertEquals(expected = expected, actual = actual)
     }
 
     companion object {
-        @JvmStatic
-        private fun getInputsByClauses() = Stream.of(
-            Arguments.of(
-                setOf(
-                    Clause(listOf(Literal("a", true), Literal("b", true), Literal("c", true))),
-                    Clause(listOf(Literal("a", true), Literal("b", true), Literal("c", true))),
-                )
-            ),
-            Arguments.of(
-                setOf(
-                    Clause(listOf(Literal("a", true))),
-                    Clause(listOf(Literal("a", true))),
-                )
-            )
-        )
-
         @JvmStatic
         private fun getsInputByCNF() = Stream.of(
             Arguments.of(
@@ -61,6 +38,12 @@ class SATSolverTest {
             ),
             Arguments.of(
                 "(a) * (-a)", false
+            ),
+            Arguments.of(
+                "(a + b + c) * (a + b + c)", true
+            ),
+            Arguments.of(
+                "(a + -b + -c) * (-a + -b + c)", true
             )
         )
     }
