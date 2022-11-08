@@ -16,7 +16,7 @@ object Main {
     }
 
     fun readInput(input: String): List<Clause> =
-        input.trim().split("*").asSequence().mapIndexed { index, value ->
+        input.trim().splitToSequence("*").mapIndexed { index, value ->
             try {
                 createClause(value)
             } catch (e: InvalidClauseException) {
@@ -27,12 +27,10 @@ object Main {
     private fun createLiteral(value: String): Literal {
         val firstChar = value.first()
 
-        if (firstChar != NEGATOR && !firstChar.isLetter())
-            throw InvalidParameterException()
-
-        return when (firstChar) {
-            NEGATOR -> Literal(value[1], false)
-            else -> Literal(firstChar, true)
+        return when {
+            firstChar == NEGATOR -> Literal(value.drop(1), false)
+            firstChar.isLetter() -> Literal(value, true)
+            else -> throw InvalidParameterException()
         }
     }
 
@@ -41,14 +39,14 @@ object Main {
             .trim()
             .filter { !it.isWhitespace() }
             .removeSurrounding("(", ")")
-            .split(OR)
+            .splitToSequence(OR)
             .mapIndexed { index, value ->
                 try {
                     createLiteral(value)
                 } catch (e: IllegalArgumentException) {
                     throw InvalidClauseException(index)
                 }
-            }
+            }.toList()
 
         return Clause(
             firstLiteral = literals[0],
@@ -59,7 +57,7 @@ object Main {
 }
 
 data class Literal(
-    val value: Char,
+    val value: String,
     val isPositive: Boolean
 )
 
