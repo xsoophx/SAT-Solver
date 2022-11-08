@@ -26,22 +26,22 @@ class ParsingTest {
             Arguments.of(
                 "(a + b + c) * (a + b + c)",
                 listOf(
-                    Clause(Literal("a", true), Literal("b", true), Literal("c", true)),
-                    Clause(Literal("a", true), Literal("b", true), Literal("c", true)),
+                    Clause(listOf(Literal("a", true), Literal("b", true), Literal("c", true))),
+                    Clause(listOf(Literal("a", true), Literal("b", true), Literal("c", true))),
                 )
             ),
             Arguments.of(
                 "(-a + b + -c) * (a + -b + c)",
                 listOf(
-                    Clause(Literal("a", false), Literal("b", true), Literal("c", false)),
-                    Clause(Literal("a", true), Literal("b", false), Literal("c", true)),
+                    Clause(listOf(Literal("a", false), Literal("b", true), Literal("c", false))),
+                    Clause(listOf(Literal("a", true), Literal("b", false), Literal("c", true))),
                 )
             ),
             Arguments.of(
                 "(-AB + CD + -CF) * (string + -dummy + value)",
                 listOf(
-                    Clause(Literal("AB", false), Literal("CD", true), Literal("CF", false)),
-                    Clause(Literal("string", true), Literal("dummy", false), Literal("value", true)),
+                    Clause(listOf(Literal("AB", false), Literal("CD", true), Literal("CF", false))),
+                    Clause(listOf(Literal("string", true), Literal("dummy", false), Literal("value", true))),
                 )
             )
         )

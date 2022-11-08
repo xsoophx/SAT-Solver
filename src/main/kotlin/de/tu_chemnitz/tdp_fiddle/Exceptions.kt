@@ -1,6 +1,4 @@
 package de.tu_chemnitz.tdp_fiddle
 
-import java.security.InvalidParameterException
-
-class InvalidClauseException(val index: Int) : InvalidParameterException()
-class InvalidFormulaException(val indexClause: Int, val indexLiteral: Int) : InvalidParameterException()
+class InvalidClauseException(val index: Int, cause: Throwable? = null) : IllegalArgumentException(cause)
+class InvalidFormulaException(val indexClause: Int, val indexLiteral: Int, cause: Throwable? = null) : IllegalArgumentException(cause)

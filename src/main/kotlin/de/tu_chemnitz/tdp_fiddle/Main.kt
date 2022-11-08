@@ -1,7 +1,5 @@
 package de.tu_chemnitz.tdp_fiddle
 
-import java.security.InvalidParameterException
-
 object Main {
     private const val OR = '+'
     private const val NEGATOR = '-'
@@ -15,14 +13,46 @@ object Main {
         }
     }
 
+    //TODO: add fancy logic
+    /*
+    fun List<Clause>.getAdjacencyList(): Map<Literal, Literal> {
+        return asSequence().flatMap {
+            it.literals.asSequence().map { it to it }
+        }.toMap()
+    }*/
+
     fun readInput(input: String): List<Clause> =
         input.trim().splitToSequence("*").mapIndexed { index, value ->
             try {
                 createClause(value)
             } catch (e: InvalidClauseException) {
-                throw InvalidFormulaException(indexClause = index, indexLiteral = e.index)
+                throw InvalidFormulaException(indexClause = index, indexLiteral = e.index, e)
             }
         }.toList()
+
+    private fun createClause(clause: String): Clause {
+        val literals = clause
+            .trim()
+            .filterNot(Char::isWhitespace)
+            .removeSurrounding("(", ")")
+            .splitToSequence(OR)
+            .take(4)
+            .mapIndexed { index, value ->
+                try {
+                    createLiteral(value)
+                } catch (e: IllegalArgumentException) {
+                    throw InvalidClauseException(index, e)
+                }
+            }.toList()
+
+        if (literals.size != 3) {
+            throw InvalidFormulaException(0, 0, IllegalArgumentException("Formula must contain exactly 3 clauses!"))
+        }
+
+        return Clause(
+            literals.take(3)
+        )
+    }
 
     private fun createLiteral(value: String): Literal {
         val firstChar = value.first()
@@ -30,29 +60,8 @@ object Main {
         return when {
             firstChar == NEGATOR -> Literal(value.drop(1), false)
             firstChar.isLetter() -> Literal(value, true)
-            else -> throw InvalidParameterException()
+            else -> throw IllegalArgumentException("Literal \"$value\" did not start with a letter.")
         }
-    }
-
-    private fun createClause(clause: String): Clause {
-        val literals = clause
-            .trim()
-            .filter { !it.isWhitespace() }
-            .removeSurrounding("(", ")")
-            .splitToSequence(OR)
-            .mapIndexed { index, value ->
-                try {
-                    createLiteral(value)
-                } catch (e: IllegalArgumentException) {
-                    throw InvalidClauseException(index)
-                }
-            }.toList()
-
-        return Clause(
-            firstLiteral = literals[0],
-            secondLiteral = literals[1],
-            thirdLiteral = literals[2],
-        )
     }
 }
 
@@ -62,7 +71,5 @@ data class Literal(
 )
 
 data class Clause(
-    val firstLiteral: Literal,
-    val secondLiteral: Literal,
-    val thirdLiteral: Literal,
+    val literals: List<Literal>
 )
