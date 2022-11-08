@@ -1,8 +1,5 @@
-package de.tu_chemnitz_tdp_fiddle
+package de.tu_chemnitz.tdp_fiddle
 
-import de.tu_chemnitz.tdp_fiddle.Clause
-import de.tu_chemnitz.tdp_fiddle.Literal
-import de.tu_chemnitz.tdp_fiddle.Main
 import java.util.stream.Stream
 import kotlin.test.assertEquals
 import org.junit.jupiter.api.TestInstance

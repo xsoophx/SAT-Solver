@@ -36,7 +36,6 @@ object Main {
             .filterNot(Char::isWhitespace)
             .removeSurrounding("(", ")")
             .splitToSequence(OR)
-            .take(4)
             .mapIndexed { index, value ->
                 try {
                     createLiteral(value)
@@ -45,13 +44,7 @@ object Main {
                 }
             }.toList()
 
-        if (literals.size != 3) {
-            throw InvalidFormulaException(0, 0, IllegalArgumentException("Formula must contain exactly 3 clauses!"))
-        }
-
-        return Clause(
-            literals.take(3)
-        )
+        return Clause(literals)
     }
 
     private fun createLiteral(value: String): Literal {
