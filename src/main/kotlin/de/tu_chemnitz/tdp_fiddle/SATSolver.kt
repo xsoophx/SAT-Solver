@@ -9,7 +9,7 @@ object SATSolver {
     private fun dp(cnf: Set<Clause>): Boolean {
         if (cnf.isEmpty()) return true
         if (cnf.any { it.literals.isEmpty() }) return false
-        if (!cnf.containsContradiction()) return false
+        if (cnf.containsContradiction()) return false
 
         val literal = cnf.first().literals.firstOrNull()?.value ?: return false
 
@@ -29,11 +29,11 @@ object SATSolver {
                 val literal = clause.literals.first()
                 val negated = Literal(literal.value, !literal.isPositive)
 
-                if (negated in oneLiterals) return false
+                if (negated in oneLiterals) return true
 
                 oneLiterals.add(literal)
             }
-        return true
+        return false
     }
 
     private fun Clause.simplify(literal: Literal): Clause? {
