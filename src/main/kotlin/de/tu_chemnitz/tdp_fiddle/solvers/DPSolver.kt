@@ -1,4 +1,7 @@
-package de.tu_chemnitz.tdp_fiddle
+package de.tu_chemnitz.tdp_fiddle.solvers
+
+import de.tu_chemnitz.tdp_fiddle.Clause
+import de.tu_chemnitz.tdp_fiddle.Literal
 
 object DPSolver : SATSolver {
 

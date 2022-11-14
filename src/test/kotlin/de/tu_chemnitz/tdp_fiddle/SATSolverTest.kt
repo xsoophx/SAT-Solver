@@ -1,5 +1,8 @@
 package de.tu_chemnitz.tdp_fiddle
 
+import de.tu_chemnitz.tdp_fiddle.solvers.DPSolver
+import de.tu_chemnitz.tdp_fiddle.solvers.ResolutionSolver
+import de.tu_chemnitz.tdp_fiddle.solvers.SATSolver
 import java.util.stream.Stream
 import kotlin.test.assertEquals
 import org.junit.jupiter.api.TestInstance

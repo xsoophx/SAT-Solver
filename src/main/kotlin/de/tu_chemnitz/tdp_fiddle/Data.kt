@@ -12,8 +12,3 @@ data class Clause(
 ) : Set<Literal> by literals {
     constructor(vararg literals: Literal) : this(setOf(*literals))
 }
-
-enum class Method {
-    DP,
-    RESOLUTION
-}
