@@ -13,38 +13,35 @@ object Main {
         }
     }
 
-    //TODO: add fancy logic
-    /*
-    fun List<Clause>.getAdjacencyList(): Map<Literal, Literal> {
-        return asSequence().flatMap {
-            it.literals.asSequence().map { it to it }
-        }.toMap()
-    }*/
-
-    fun readInput(input: String): List<Clause> =
+    fun readInput(input: String, clausesOfTwo: Boolean = false): List<Clause> =
         input.trim().splitToSequence("*").mapIndexed { index, value ->
             try {
-                createClause(value)
+                if (clausesOfTwo) createClausesOfTwo(value) else createClause(value)
             } catch (e: InvalidClauseException) {
                 throw InvalidFormulaException(indexClause = index, indexLiteral = e.index, e)
             }
         }.toList()
 
-    private fun createClause(clause: String): Clause {
-        val literals = clause
-            .trim()
-            .filterNot(Char::isWhitespace)
-            .removeSurrounding("(", ")")
-            .splitToSequence(OR)
-            .mapIndexed { index, value ->
-                try {
-                    createLiteral(value)
-                } catch (e: IllegalArgumentException) {
-                    throw InvalidClauseException(index, e)
-                }
-            }.toList()
+    private fun createClausesOfTwo(clause: String): Clause = createClause(clause, 2)
 
-        return Clause(literals)
+    private fun createClause(clause: String, literalsPerClause: Int? = null): Clause {
+        return when (literalsPerClause != null) {
+            true -> Clause(clause.getContent().take(literalsPerClause).createLiterals())
+            else -> Clause(clause.getContent().createLiterals())
+        }
+    }
+
+    private fun String.getContent() =
+        trim().filterNot(Char::isWhitespace).removeSurrounding("(", ")").splitToSequence(OR)
+
+    private fun Sequence<String>.createLiterals(): Set<Literal> {
+        return mapIndexed { index, value ->
+            try {
+                createLiteral(value)
+            } catch (e: IllegalArgumentException) {
+                throw InvalidClauseException(index, e)
+            }
+        }.toSet()
     }
 
     private fun createLiteral(value: String): Literal {
@@ -57,12 +54,3 @@ object Main {
         }
     }
 }
-
-data class Literal(
-    val value: String,
-    val isPositive: Boolean
-)
-
-data class Clause(
-    val literals: List<Literal>
-)
