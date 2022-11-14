@@ -5,41 +5,46 @@ import kotlin.test.assertEquals
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
-import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.MethodSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SATSolverTest {
 
     @ParameterizedTest
-    @EnumSource(Method::class)
-    fun `empty formula is solvable`(method: Method) {
+    @MethodSource("getSolvers")
+    fun `empty formula is solvable`(solver: SATSolver) {
         val emptyFormula = setOf<Clause>()
-        assertEquals(expected = true, actual = SATSolver.isSolvable(emptyFormula, method))
+        assertEquals(expected = true, actual = solver.isSolvable(emptyFormula))
     }
 
     @ParameterizedTest
-    @EnumSource(Method::class)
-    fun `formulas with empty clauses are not solvable`(method: Method) {
+    @MethodSource("getSolvers")
+    fun `formulas with empty clauses are not solvable`(solver: SATSolver) {
         val emptyClause = setOf(Clause(emptySet()))
-        assertEquals(expected = false, actual = SATSolver.isSolvable(emptyClause, method))
+        assertEquals(expected = false, actual = solver.isSolvable(emptyClause))
     }
 
     @ParameterizedTest
     @MethodSource("getInputByCNF")
     fun `gets formulas correctly with dp`(cnf: String, expected: Boolean) {
-        val actual = SATSolver.isSolvable(Main.readInput(cnf).toSet(), Method.DP)
+        val actual = DPSolver.isSolvable(Main.readInput(cnf).toSet())
         assertEquals(expected = expected, actual = actual)
     }
 
     @ParameterizedTest
     @MethodSource("getInputByCNF")
     fun `gets formulas correctly with resolution`(cnf: String, expected: Boolean) {
-        val actual = SATSolver.isSolvable(Main.readInput(cnf).toSet(), Method.RESOLUTION)
+        val actual = ResolutionSolver.isSolvable(Main.readInput(cnf).toSet())
         assertEquals(expected = expected, actual = actual)
     }
 
     companion object {
+        @JvmStatic
+        private fun getSolvers() = Stream.of(
+            Arguments.of(DPSolver),
+            Arguments.of(ResolutionSolver)
+        )
+
         @JvmStatic
         private fun getInputByCNF() = Stream.of(
             Arguments.of(
