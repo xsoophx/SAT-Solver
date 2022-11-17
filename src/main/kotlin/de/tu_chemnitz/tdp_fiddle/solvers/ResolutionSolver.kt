@@ -1,29 +1,51 @@
 package de.tu_chemnitz.tdp_fiddle.solvers
 
 import de.tu_chemnitz.tdp_fiddle.Clause
-import de.tu_chemnitz.tdp_fiddle.Literal
 
 object ResolutionSolver : SATSolver {
 
-    override fun isSolvable(cnf: Set<Clause>): Boolean = resolution(cnf)
+    private val resolvents: MutableSet<Clause> = mutableSetOf()
 
-    private fun resolution(input: Set<Clause>): Boolean {
-        val cnf = input.removeTautologies()
+    override fun isSolvable(cnf: Set<Clause>): Boolean = prepareResolution(cnf)
+
+    private fun prepareResolution(cnf: Set<Clause>): Boolean {
+        resolvents.clear()
         if (cnf.isEmpty()) return true
         if (cnf.any { it.literals.isEmpty() }) return false
 
-        val literals = cnf.asSequence().flatMap { clause -> clause.literals.asSequence() }.toSet()
-        val (literal, clauses) = literals.firstNotNullOfOrNull { literal ->
-            literal.findClausesToResolve(cnf)?.let { clauses -> literal to clauses }
-        } ?: return cnf.isNotEmpty()
+        resolution(cnf.removeTautologies())
+        return resolvents.all { it.literals.isNotEmpty() }
+    }
 
-        val nextCnf = cnf.toMutableSet().apply {
-            remove(clauses.first)
-            remove(clauses.second)
-            add(createResolvent(clauses.first, clauses.second, literal))
-        }.toSet()
+    private fun resolution(cnf: Set<Clause>) {
+        cnf.combineAllElements(cnf, ::resolve)
+    }
 
-        return resolution(nextCnf)
+    private inline fun Set<Clause>.combineAllElements(cnf: Set<Clause>, block: (Set<Clause>, Clause, Clause) -> Unit) {
+        asSequence().forEach { outerClause ->
+            asSequence().forEach { innerClause ->
+                block(cnf, outerClause, innerClause)
+            }
+        }
+    }
+
+    private fun resolve(cnf: Set<Clause>, outerClause: Clause, innerClause: Clause) {
+        val currentResolvents = findAllResolvents(outerClause, innerClause)
+
+        if (outerClause != innerClause && currentResolvents.isNotEmpty()) {
+            currentResolvents.asSequence().forEach { resolvent ->
+                resolvents.add(resolvent)
+                if (resolvent.isEmpty()) return
+
+                val nextCnf = cnf.toMutableSet().apply {
+                    remove(outerClause)
+                    remove(innerClause)
+                    add(resolvent)
+                }.toSet()
+
+                resolution(nextCnf)
+            }
+        }
     }
 
     private fun Set<Clause>.removeTautologies(): Set<Clause> =
@@ -37,21 +59,11 @@ object ResolutionSolver : SATSolver {
         return this
     }
 
-    private fun Literal.findClausesToResolve(cnf: Set<Clause>): Pair<Clause, Clause>? {
-        val positiveClause = findClause(cnf) ?: return null
-        val negativeClause = negated().findClause(cnf) ?: return null
-        if (positiveClause != negativeClause)
-            return Pair(positiveClause, negativeClause)
-
-        return null
-    }
-
-    private fun Literal.findClause(cnf: Set<Clause>): Clause? = cnf.find { clause -> this in clause.literals }
-
-    private fun createResolvent(c: Clause, d: Clause, literal: Literal): Clause {
-        return if (literal in c.literals)
-            Clause(c.literals - literal + d.literals - literal.negated())
-        else
-            Clause(c.literals - literal.negated() + d.literals - literal)
+    private fun findAllResolvents(c: Clause, d: Clause): Set<Clause> {
+        return c.literals.mapNotNull { literal ->
+            if (literal.negated() in d.literals) {
+                Clause(c.literals - literal + d.literals - literal.negated())
+            } else null
+        }.toSet()
     }
 }
