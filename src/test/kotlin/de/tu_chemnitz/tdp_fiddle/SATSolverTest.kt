@@ -1,5 +1,6 @@
 package de.tu_chemnitz.tdp_fiddle
 
+import de.tu_chemnitz.tdp_fiddle.solvers.DPLLSolver
 import de.tu_chemnitz.tdp_fiddle.solvers.DPSolver
 import de.tu_chemnitz.tdp_fiddle.solvers.ResolutionSolver
 import de.tu_chemnitz.tdp_fiddle.solvers.SATSolver
@@ -45,6 +46,7 @@ class SATSolverTest {
         @JvmStatic
         private fun getSolvers() = Stream.of(
             Arguments.of(DPSolver),
+            Arguments.of(DPLLSolver),
             Arguments.of(ResolutionSolver)
         )
 
@@ -70,6 +72,9 @@ class SATSolverTest {
             ),
             Arguments.of(
                 "(b +-c) * (-a) * (a + c) * (a + -b) * (b + c)", false
+            ),
+            Arguments.of(
+                "(a + b +-c) * (a + -b) * (b + c) * (-a + -b + -c) * (-a + -b + c) * (-a + b + -c)", false
             )
         )
     }
