@@ -1,6 +1,9 @@
 package de.tu_chemnitz.tdp_fiddle.solvers
 
 import de.tu_chemnitz.tdp_fiddle.Clause
+import mu.KotlinLogging
+
+private val logger = KotlinLogging.logger {}
 
 object ResolutionSolver : SATSolver {
 
@@ -13,29 +16,32 @@ object ResolutionSolver : SATSolver {
         if (cnf.isEmpty()) return true
         if (cnf.any { it.literals.isEmpty() }) return false
 
-        resolution(cnf.removeTautologies())
-        return resolvents.all { it.literals.isNotEmpty() }
+        return resolution(cnf.removeTautologies())
     }
 
-    private fun resolution(cnf: Set<Clause>) {
+    private fun resolution(cnf: Set<Clause>): Boolean {
         cnf.combineAllElements(cnf, ::resolve)
+        return resolvents.all { it.isNotEmpty() }
     }
 
-    private inline fun Set<Clause>.combineAllElements(cnf: Set<Clause>, block: (Set<Clause>, Clause, Clause) -> Unit) {
-        asSequence().forEach { outerClause ->
-            asSequence().forEach { innerClause ->
-                block(cnf, outerClause, innerClause)
+    private inline fun Set<Clause>.combineAllElements(
+        cnf: Set<Clause>,
+        block: (Set<Clause>, Clause, Clause) -> Boolean
+    ) {
+        forEach { outerClause ->
+            forEach { innerClause ->
+                if (outerClause != innerClause && !block(cnf, outerClause, innerClause)) return
             }
         }
     }
 
-    private fun resolve(cnf: Set<Clause>, outerClause: Clause, innerClause: Clause) {
+    private fun resolve(cnf: Set<Clause>, outerClause: Clause, innerClause: Clause): Boolean {
         val currentResolvents = findAllResolvents(outerClause, innerClause)
 
-        if (outerClause != innerClause && currentResolvents.isNotEmpty()) {
-            currentResolvents.asSequence().forEach { resolvent ->
+        if (currentResolvents.isNotEmpty()) {
+            currentResolvents.forEach { resolvent ->
                 resolvents.add(resolvent)
-                if (resolvent.isEmpty()) return
+                if (resolvent.isEmpty()) return false
 
                 val nextCnf = cnf.toMutableSet().apply {
                     remove(outerClause)
@@ -43,9 +49,11 @@ object ResolutionSolver : SATSolver {
                     add(resolvent)
                 }.toSet()
 
-                resolution(nextCnf)
+                logger.info { "$nextCnf" }
+                return resolution(nextCnf)
             }
         }
+        return true
     }
 
     private fun Set<Clause>.removeTautologies(): Set<Clause> =
