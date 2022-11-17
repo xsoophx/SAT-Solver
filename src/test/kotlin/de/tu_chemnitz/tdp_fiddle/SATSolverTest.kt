@@ -37,6 +37,13 @@ class SATSolverTest {
 
     @ParameterizedTest
     @MethodSource("getInputByCNF")
+    fun `gets formulas correctly with dpll`(cnf: String, expected: Boolean) {
+        val actual = DPLLSolver.isSolvable(Main.readInput(cnf).toSet())
+        assertEquals(expected = expected, actual = actual)
+    }
+
+    @ParameterizedTest
+    @MethodSource("getInputByCNF")
     fun `gets formulas correctly with resolution`(cnf: String, expected: Boolean) {
         val actual = ResolutionSolver.isSolvable(Main.readInput(cnf).toSet())
         assertEquals(expected = expected, actual = actual)

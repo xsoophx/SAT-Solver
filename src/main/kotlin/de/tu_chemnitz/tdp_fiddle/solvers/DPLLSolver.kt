@@ -2,6 +2,9 @@ package de.tu_chemnitz.tdp_fiddle.solvers
 
 import de.tu_chemnitz.tdp_fiddle.Clause
 import de.tu_chemnitz.tdp_fiddle.Literal
+import mu.KotlinLogging
+
+private val logger = KotlinLogging.logger {}
 
 object DPLLSolver : SATSolver {
 
@@ -16,6 +19,8 @@ object DPLLSolver : SATSolver {
 
         if (unitClause != null) {
             val newCnf = cnf.setByLiteral(unitClause.first())
+            logger.info { "$newCnf" }
+
             return dpll(newCnf)
         } else {
             val literal = cnf.first().literals.firstOrNull()?.value ?: return false
