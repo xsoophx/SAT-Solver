@@ -1,5 +1,7 @@
-package de.tu_chemnitz.tdp_fiddle
+package de.tu_chemnitz.tdp_fiddle.parsers
 
+import de.tu_chemnitz.tdp_fiddle.Clause
+import de.tu_chemnitz.tdp_fiddle.Literal
 import java.util.stream.Stream
 import kotlin.test.assertEquals
 import org.junit.jupiter.api.TestInstance
@@ -8,19 +10,19 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class ParsingTest {
+class CNFParsingTest {
 
     @ParameterizedTest
     @MethodSource("getInputs")
     fun `reads correct input`(input: String, expected: List<Clause>) {
-        val actual = Main.readInput(input)
+        val actual = CNFParser.readInput(input)
         assertEquals(expected = expected, actual = actual)
     }
 
     @ParameterizedTest
     @MethodSource("getClausesOfTwo")
     fun `reads correct clauses of two`(input: String, expected: List<Clause>) {
-        val actual = Main.readInput(input, true)
+        val actual = CNFParser.readInput(input, true)
         assertEquals(expected = expected, actual = actual)
     }
 

@@ -1,5 +1,6 @@
 package de.tu_chemnitz.tdp_fiddle
 
+import de.tu_chemnitz.tdp_fiddle.parsers.CNFParser
 import de.tu_chemnitz.tdp_fiddle.solvers.DPLLSolver
 import de.tu_chemnitz.tdp_fiddle.solvers.DPSolver
 import de.tu_chemnitz.tdp_fiddle.solvers.ResolutionSolver
@@ -31,21 +32,21 @@ class SATSolverTest {
     @ParameterizedTest
     @MethodSource("getInputByCNF")
     fun `gets formulas correctly with dp`(cnf: String, expected: Boolean) {
-        val actual = DPSolver.isSolvable(Main.readInput(cnf).toSet())
+        val actual = DPSolver.isSolvable(CNFParser.readInput(cnf).toSet())
         assertEquals(expected = expected, actual = actual)
     }
 
     @ParameterizedTest
     @MethodSource("getInputByCNF")
     fun `gets formulas correctly with dpll`(cnf: String, expected: Boolean) {
-        val actual = DPLLSolver.isSolvable(Main.readInput(cnf).toSet())
+        val actual = DPLLSolver.isSolvable(CNFParser.readInput(cnf).toSet())
         assertEquals(expected = expected, actual = actual)
     }
 
     @ParameterizedTest
     @MethodSource("getInputByCNF")
     fun `gets formulas correctly with resolution`(cnf: String, expected: Boolean) {
-        val actual = ResolutionSolver.isSolvable(Main.readInput(cnf).toSet())
+        val actual = ResolutionSolver.isSolvable(CNFParser.readInput(cnf).toSet())
         assertEquals(expected = expected, actual = actual)
     }
 
