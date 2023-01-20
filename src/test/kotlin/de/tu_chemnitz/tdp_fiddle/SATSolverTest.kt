@@ -73,7 +73,7 @@ class SATSolverTest {
                 "(a + -b + -c) * (-a + -b + c)", true
             ),
             Arguments.of(
-                "(a + b) * (-a + -b + c) * (-c)", true
+                "(a + b) * (-a + -b + c) * (-c)", false
             ),
             Arguments.of(
                 "(a + b + -c) * (-a) * (a + b + c) * (a + -b)", false

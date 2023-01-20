@@ -1,56 +1,59 @@
 package de.tu_chemnitz.tdp_fiddle.solvers
 
 import de.tu_chemnitz.tdp_fiddle.Clause
-import mu.KotlinLogging
-
-private val logger = KotlinLogging.logger {}
 
 object ResolutionSolver : SATSolver {
 
-    private val resolvents: MutableSet<Clause> = mutableSetOf()
+    private val currentResolvents: MutableSet<Clause> = mutableSetOf()
+    private val newResolvents: MutableSet<Clause> = mutableSetOf()
 
     override fun isSolvable(cnf: Set<Clause>): Boolean = prepareResolution(cnf)
 
     private fun prepareResolution(cnf: Set<Clause>): Boolean {
-        resolvents.clear()
+        currentResolvents.clear()
+        newResolvents.clear()
+
         if (cnf.isEmpty()) return true
         if (cnf.any { it.literals.isEmpty() }) return false
+        currentResolvents += cnf
+        newResolvents += cnf
 
         return resolution(cnf.removeTautologies())
     }
 
     private fun resolution(cnf: Set<Clause>): Boolean {
-        cnf.combineAllElements(cnf, ::resolve)
-        return resolvents.all { it.isNotEmpty() }
+        val satisfiable = cnf.combineAllElements(::resolve)
+
+        if (!satisfiable)
+            return false
+
+        if (newResolvents != currentResolvents) {
+            currentResolvents += newResolvents
+            return resolution(currentResolvents)
+        }
+
+        return true
     }
 
     private inline fun Set<Clause>.combineAllElements(
-        cnf: Set<Clause>,
-        block: (Set<Clause>, Clause, Clause) -> Boolean
-    ) {
+        block: (Clause, Clause) -> Boolean
+    ): Boolean {
         forEach { outerClause ->
             forEach { innerClause ->
-                if (outerClause != innerClause && !block(cnf, outerClause, innerClause)) return
+                if (outerClause != innerClause && !block(outerClause, innerClause)) return false
             }
         }
+        return true
     }
 
-    private fun resolve(cnf: Set<Clause>, outerClause: Clause, innerClause: Clause): Boolean {
+    private fun resolve(outerClause: Clause, innerClause: Clause): Boolean {
         val currentResolvents = findAllResolvents(outerClause, innerClause)
 
         if (currentResolvents.isNotEmpty()) {
             currentResolvents.forEach { resolvent ->
-                resolvents.add(resolvent)
                 if (resolvent.isEmpty()) return false
 
-                val nextCnf = cnf.toMutableSet().apply {
-                    remove(outerClause)
-                    remove(innerClause)
-                    add(resolvent)
-                }.toSet()
-
-                logger.info { "$nextCnf" }
-                return resolution(nextCnf)
+                newResolvents += resolvent
             }
         }
         return true
